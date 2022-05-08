@@ -22,42 +22,76 @@ const calculateOrderAmount = async (items) => {
     { _id: 1, price: 1 }
   );
 
-  console.log(records);
+  // console.log(records);
 
   let totalPrice = 0;
 
-  items.map((item) => {
-    totalPrice =
-      totalPrice +
-      records.find((x) => x._id.toString() === item._id).price * item.quantity;
+  // items.map((item) => {
+  //   totalPrice =
+  //     totalPrice +
+  //     records.find((x) => x._id.toString() === item._id).price * item.quantity;
+  // });
+
+  // let productItems = [];
+
+  const productItems = items.map((item) => {
+    return {
+      price_data: {
+        currency: "cad",
+        product_data: {
+          name: item.title,
+        },
+        unit_amount:
+          records.find((x) => x._id.toString() === item._id).price * 100,
+      },
+      quantity: item.quantity,
+    };
   });
 
-  return totalPrice;
+  // console.log(productItems[1]);
+
+  return productItems;
 };
 
 //payment using stripe
 router.post("/payment", async (req, res) => {
   // console.log(req.body.cart.products);
-  // calculateOrderAmount(req.body.cart.products);
+  const line_items = await calculateOrderAmount(req.body.cart.products);
+
+  console.log(line_items);
+
+  // [
+  //   {
+  //     price_data: {
+  //       currency: "usd",
+  //       product_data: {
+  //         name: "T-shirt",
+  //       },
+  //       unit_amount: 2000,
+  //     },
+  //     quantity: 2,
+  //   },
+  //   {
+  //     price_data: {
+  //       currency: "usd",
+  //       product_data: {
+  //         name: "Cookie",
+  //       },
+  //       unit_amount: 3000,
+  //     },
+  //     quantity: 3,
+  //   },
+  // ],
+
+  console.log("test");
   const session = await stripe.checkout.sessions.create({
-    line_items: [
-      {
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: "T-shirt",
-          },
-          unit_amount: 2000,
-        },
-        quantity: 2,
-      },
-    ],
+    line_items: [...line_items],
     mode: "payment",
     success_url: "http://localhost:3000/success",
     cancel_url: "http://localhost:3000/",
   });
 
-  console.log(session);
+  // console.log(session);
 
   // res.redirect(303, session.url);
 
