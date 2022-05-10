@@ -7,6 +7,7 @@ const productRoute = require("./routes/product");
 const cartRoute = require("./routes/cart");
 const orderRoute = require("./routes/order");
 const stripeRoute = require("./routes/stripe");
+const webhookRoute = require("./routes/webhooks");
 
 const cors = require("cors");
 
@@ -25,6 +26,12 @@ mongoose
 //   console.log("Test is success");
 // });
 app.use(cors());
+app.use(
+  "/api/webhook",
+  express.raw({ type: "application/json" }),
+  webhookRoute
+);
+
 app.use(express.json());
 app.use("/api/user", userRoute);
 app.use("/api/auth", authRoute);
