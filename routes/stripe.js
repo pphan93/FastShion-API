@@ -26,9 +26,13 @@ const calculateOrderAmount = async (items) => {
     return {
       price_data: {
         currency: "cad",
+
         product_data: {
           name: item.title,
           images: [item.img],
+          metadata: {
+            productID: item._id,
+          },
         },
         unit_amount:
           records.find((x) => x._id.toString() === item._id).price * 100,

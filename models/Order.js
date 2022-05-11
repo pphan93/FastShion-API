@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const OrderSchema = new mongoose.Schema(
   {
-    userId: {
+    email: {
       type: String,
       required: true,
     },
@@ -28,6 +28,9 @@ const OrderSchema = new mongoose.Schema(
     status: {
       type: String,
       default: "pending",
+    },
+    name: {
+      type: String,
     },
   },
   { timestamps: true }

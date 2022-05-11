@@ -26,6 +26,8 @@ mongoose
 //   console.log("Test is success");
 // });
 app.use(cors());
+
+//stripe webhook, to send status regarding the payment (success, fail, etc), will use this to update order db
 app.use(
   "/api/webhook",
   express.raw({ type: "application/json" }),

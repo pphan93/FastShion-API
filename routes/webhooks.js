@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const Order = require("../models/Order");
 
 const stripe = require("stripe")(process.env.STRIPE_KEY);
 
@@ -39,13 +40,53 @@ router.post("/", async (req, res) => {
     }
     case "checkout.session.completed": {
       const checkout = event.data.object;
-      const { line_items } = await stripe.checkout.sessions.retrieve(
+      console.log(checkout);
+
+      //get line items that get send to stripe, also expand the product data to get data regarding products
+      //to get products that was ordered
+      const line_items = await stripe.checkout.sessions.listLineItems(
         checkout.id,
         {
-          expand: ["line_items"],
+          expand: ["data.price.product"],
         }
       );
-      console.log(line_items);
+
+      // const data = await stripe.checkout.sessions.listLineItems(checkout.id);
+      // const { line_items } = await stripe.checkout.sessions.retrieve(
+      //   checkout.id,
+      //   {
+      //     expand: ["line_items"],
+      //   }
+      // );
+
+      let products = [];
+
+      line_items.data.map((item) => {
+        products.push({
+          productId: item.price.product.metadata.productID,
+          quantity: item.quantity,
+        });
+      });
+
+      const orderDetail = {
+        email: checkout.customer_details.email,
+        products: products,
+        amount: checkout.amount_total / 100,
+        address: checkout.customer_details.address,
+        name: checkout.customer_details.name,
+      };
+
+      //save to order db
+      const newOrder = new Order(orderDetail);
+
+      try {
+        const savedOrder = await newOrder.save();
+      } catch (error) {
+        console.log(error);
+      }
+
+      console.log(products);
+
       break;
     }
     default: {
