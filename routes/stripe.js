@@ -50,7 +50,8 @@ const calculateOrderAmount = async (items) => {
 router.post("/payment", async (req, res) => {
   //generate line_items for stripe
   const line_items = await calculateOrderAmount(req.body.cart.products);
-  const ui_url = process.env.UI_URL;
+  const success_url = process.env.UI_URL + "success";
+  const cancel_url = process.env.UI_URL;
 
   const session = await stripe.checkout.sessions.create({
     shipping_address_collection: {
@@ -103,8 +104,8 @@ router.post("/payment", async (req, res) => {
     ],
     line_items: [...line_items],
     mode: "payment",
-    success_url: ui_url + "success",
-    cancel_url: ui_url,
+    success_url: success_url,
+    cancel_url: cancel_url,
   });
 
   //doesnt seem to work if using fetch instead of <form action="" method="POST">
